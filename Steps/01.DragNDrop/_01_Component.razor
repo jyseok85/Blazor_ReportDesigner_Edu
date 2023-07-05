@@ -1,0 +1,19 @@
+﻿@inject _01_DragAndDropService DragService
+
+<div class="component" draggable="true" @ondragstart="@((e) => OnDragStart(e))"
+     style=@("transform:translate("+ PosX +"px,"+PosY+"px);position:absolute;width:100px;height:100px;")>
+</div>
+
+@code {
+    [Parameter] public int PosX { get; set; }
+    [Parameter] public int PosY { get; set; }
+    void OnDragStart(DragEventArgs e)
+    {
+        DragService.StartDrag((int)e.ClientX, (int)e.ClientY);
+    }
+    public void Update()
+    {
+        StateHasChanged();
+    }
+
+}

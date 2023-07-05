@@ -1,0 +1,21 @@
+﻿@inject _01_DragAndDropService DragService
+
+<div class="band" ondragover="event.preventDefault()" @ondrop="e=>OnDrop(e)"
+     style=@("width:" + Width + "px;" + "height:" + Height + "px;" + "position:absolute;")>
+    <_01_Component @ref=component></_01_Component>
+</div>
+@code {
+    [Parameter] public string Width { get; set; } = "0";
+    [Parameter] public string Height { get; set; } = "0";
+    public _01_Component component { get; set; }
+    void OnDrop(DragEventArgs e)
+    {
+        int mouseMoveDictanceX = (int)e.ClientX - DragService.PosX;
+        int mouseMoveDictanceY = (int)e.ClientY - DragService.PosY;
+
+        component.PosX = component.PosX + mouseMoveDictanceX;
+        component.PosY = component.PosY + mouseMoveDictanceY;
+
+        component.Update();
+    }
+}
