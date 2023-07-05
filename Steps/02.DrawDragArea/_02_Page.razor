@@ -1,0 +1,68 @@
+﻿@page "/02"
+<h3>02. Draw drag area</h3>
+<div class="dragable-area"
+     @onpointerdown=OnMouseDown
+     @onpointerup=OnMouseUp
+     @onpointermove=OnMouseMove
+     onmouseleave="event.stopPropagation()"
+     ondragover="event.preventDefault()">
+</div>
+
+<div class="drag-area"
+     @onpointerdown=OnMouseDown @onpointerdown:preventDefault
+     @onpointerup=OnMouseUp @onpointerup:preventDefault
+     @onpointermove=OnMouseMove @onpointermove:preventDefault
+     style=@("width:" + dragWidth + "px;height:" + dragHeight + "px;" + "left:" + left + "px;" + "top:" + top + "px;" ) hidden=@hidden></div>
+
+<style>
+    .drag-area
+    {
+        position: fixed;
+        border:1px solid red;
+    }
+
+    .dragable-area
+    {
+        height:500px;
+        border:1px dashed black;
+    }
+</style>
+@code {
+    double dragStartX;
+    double dragStartY;
+    double dragWidth;
+    double dragHeight;
+
+    double top;
+    double left;
+    bool hidden = true;
+    void OnMouseDown(PointerEventArgs e)
+    {
+        left = dragStartX = e.ClientX;
+        top = dragStartY = e.ClientY;
+        
+        dragWidth = 0;
+        dragHeight = 0;
+        hidden = false;
+    }
+    void OnMouseUp(PointerEventArgs e)
+    {
+        dragWidth = 0;
+        dragHeight = 0;
+        hidden = true;
+    }
+    void OnMouseMove(PointerEventArgs e)
+    {
+        if (hidden)
+            return;
+
+        var x = e.ClientX;
+        var y = e.ClientY;
+
+        dragWidth = Math.Max(x - dragStartX, dragStartX - x);
+        left = Math.Min(dragStartX, x);
+
+        dragHeight = Math.Max(y - dragStartY, dragStartY - y);
+        top = Math.Min(dragStartY, y);
+    }
+}
