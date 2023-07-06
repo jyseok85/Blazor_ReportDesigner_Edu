@@ -1,6 +1,6 @@
 ﻿public class _03_DragAndDropService
 {
-    public string Uid { get; set; }
+    public string Uid { get; set; } = string.Empty;
     public int PosX { get; set; }
     public int PosY { get; set; }
     public void StartDrag(string Uid, int posX, int posY)
