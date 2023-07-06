@@ -67,18 +67,3 @@ a, .btn-link {
         content: "An error has occurred."
     }
 
-
-.component {
-    border: 1px solid purple;
-    padding: 1rem;
-    display: block;
-    cursor: move;
-    position: absolute;
-}
-
-.band {
-    border: 1px dashed black;
-    margin: 1rem;
-    padding: 1rem;
-    display: inline-block;
-}

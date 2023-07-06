@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<_01_DragAndDropService>();
+builder.Services.AddSingleton<_03_DragAndDropService>();
 
 var app = builder.Build();
 

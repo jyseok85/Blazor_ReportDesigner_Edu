@@ -1,0 +1,103 @@
+﻿@inject _03_DragAndDropService DragService
+<div class="dragable-area"
+     @onpointerdown=OnMouseDown
+     @onpointerup=OnMouseUp
+     @onpointermove=OnMouseMove
+     onmouseleave="event.stopPropagation()"
+>
+
+    <div class="band" ondragover="event.preventDefault()" @ondrop="e=>OnDrop(e)"
+         style=@("position:absolute;")>
+
+        <CascadingValue Value="this">
+        @foreach (_03_ComponentModel component in Components)
+        {
+            <_03_Component  ComponentModel="component"></_03_Component>
+        }
+        </CascadingValue>
+
+    </div>
+</div>
+
+<_03_DragArea DragAreaModel="DragAreaModel" />
+
+@code {
+    const int dragaAreaMinSize = 10;
+
+    _03_DragAreaModel DragAreaModel = new _03_DragAreaModel();
+
+    [Parameter]
+    public List<_03_ComponentModel> Components { get; set; } = new List<_03_ComponentModel>();
+
+    public bool IsComponentMouseDown = false;
+
+
+    void OnMouseDown(PointerEventArgs e)
+    {
+        if (IsComponentMouseDown)
+            return;
+
+        DragAreaModel.DragStart(e.ClientX, e.ClientY);
+    }
+
+    void OnMouseUp(PointerEventArgs e)
+    {
+        if (IsComponentMouseDown)
+        {
+            IsComponentMouseDown = false;
+            return;
+        }
+
+        if (e.ClientX > DragAreaModel.X && e.ClientY > DragAreaModel.Y)
+            CreateComponent(e.OffsetX -DragAreaModel.Width, e.OffsetY - DragAreaModel.Height, DragAreaModel.Width, DragAreaModel.Height);
+
+        DragAreaModel.DragEnd();
+    }
+    void OnMouseMove(PointerEventArgs e)
+    {        
+        DragAreaModel.DragMove(e.ClientX, e.ClientY);
+    }
+
+    void OnDrop(DragEventArgs e)
+    {
+        int mouseMoveDictanceX = (int)e.ClientX - DragService.PosX;
+        int mouseMoveDictanceY = (int)e.ClientY - DragService.PosY;
+
+        _03_ComponentModel? workModel = Components.Find(x => x.Uid == DragService.Uid);
+
+        if (workModel is not null)
+        {
+            workModel.X = workModel.X + mouseMoveDictanceX;
+            workModel.Y = workModel.Y + mouseMoveDictanceY;
+
+            workModel.Focused = true;
+        }
+        IsComponentMouseDown = false;
+    }
+
+    bool CreateComponent(double x, double y, double width, double height)
+    {
+        ClearComponentFocus();
+
+        if (width < dragaAreaMinSize || height < dragaAreaMinSize)
+            return false;        
+
+        _03_ComponentModel component = new _03_ComponentModel()
+        {
+            Uid = Guid.NewGuid().ToString(),
+            X = x,
+            Y = y,
+            Width = width,
+            Height = height,
+            Focused = true
+        };
+        this.Components.Add(component);
+
+        return true;
+    }
+
+    public void ClearComponentFocus()
+    {
+        Components.ForEach(x => x.Focused = false);       
+    }
+}
