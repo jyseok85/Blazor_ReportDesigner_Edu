@@ -1,0 +1,44 @@
+﻿<div class="dragable-area" 
+    @onpointerup=OnPointerUp 
+    @onpointerleave=OnPointerLeave 
+    @onpointermove=OnPointerMove
+    @onpointerup:preventDefault
+    @onpointermove:preventDefault
+    @onpointerleave:preventDefault
+    ondragover="event.preventDefault()">
+    
+     <div class="band" ondragover="event.preventDefault()"
+         style=@("position:absolute;")>
+        <CascadingValue Value="this">
+        <_04_Component ComponentModel="component"></_04_Component>
+
+        </CascadingValue>
+
+    </div>
+</div>
+
+@code {
+    _04_ComponentModel component = new _04_ComponentModel();
+    public bool IsComponentMouseDown = false;
+
+    void OnPointerUp(PointerEventArgs e)
+    {
+        component.Border = true;
+        component.ResizeModel.DragEnd();
+
+        if(component.ResizeModel.IsChanged)
+        {
+            component.ApplyResize();
+        }
+        Console.WriteLine("OnPointerUp");
+    }
+    void OnPointerLeave(PointerEventArgs e)
+    {
+        Console.WriteLine("OnPointerLeave");
+    }
+    void OnPointerMove(PointerEventArgs e)
+    {
+        Console.WriteLine($"OnPointerMove {e.ClientX},{e.ClientY}");
+        component.ResizeModel.DragMove(e.ClientX, e.ClientY);
+    }
+}

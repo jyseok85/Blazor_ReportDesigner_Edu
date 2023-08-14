@@ -1,0 +1,34 @@
+﻿<div class="resize-area"
+    @onpointerup:preventDefault
+    @onpointermove:preventDefault
+     style=@("width:" + ResizeModel.Width + "px;height:" + ResizeModel.Height + "px;" +
+     GetTransform() + "border:1px solid #337ab7") hidden=@ResizeModel.Hidden>
+
+
+    <div class="ui-resize-handle ui-resizable-w" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"w")' />
+    <div class="ui-resize-handle ui-resizable-e" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"e")' />
+    <div class="ui-resize-handle ui-resizable-s" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"s")' />
+    <div class="ui-resize-handle ui-resizable-n" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"n")' />
+    <div class="ui-resize-handle ui-resizable-se" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"se")' />
+    <div class="ui-resize-handle ui-resizable-sw" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"sw")' />
+    <div class="ui-resize-handle ui-resizable-ne" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"ne")' />
+    <div class="ui-resize-handle ui-resizable-nw" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"nw")' />
+</div>
+
+@code {
+
+    [Parameter]
+    public _04_ResizeModel ResizeModel { get; set; } = new _04_ResizeModel();
+
+    void OnResizePointerDown(PointerEventArgs e, string type)
+    {
+        Console.WriteLine($"Click {e.ClientX} {e.ClientY}");
+        ResizeModel.DragStart(e.ClientX, e.ClientY, type);
+    }    
+
+    string GetTransform()
+    {
+        //부모 컴포넌트의 Border에 의해서 1px 씩 밀려나기 때문에 조정해준다.
+        return "transform:translate(" + (ResizeModel.X - 1) + "px, " + (ResizeModel.Y - 1) + "px);";
+    }
+}

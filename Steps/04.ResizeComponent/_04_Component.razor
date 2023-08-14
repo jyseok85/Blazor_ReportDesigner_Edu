@@ -1,0 +1,45 @@
+﻿<div class="component" 
+     @onpointerdown=OnMouseDown
+     style=@("transform:" + GetStyle("translate") + "position:absolute;" + GetStyle("width") + GetStyle("height") + GetStyle("border"))>
+
+    <_04_ResizeArea ResizeModel=ComponentModel.ResizeModel></_04_ResizeArea>
+
+</div>
+
+@code {
+    [CascadingParameter] _04_Band Band { get; set; }
+    [Parameter] public _04_ComponentModel ComponentModel { get; set; } = new _04_ComponentModel();
+
+    //테두리를 그려준다.
+    void OnMouseDown(PointerEventArgs e)
+    {
+        if (ComponentModel.Focused == false)
+        {            
+            Band.IsComponentMouseDown = true;
+            ComponentModel.Focused = true;
+            ComponentModel.ResizeModel.SetComponent(ComponentModel.X, ComponentModel.Y, ComponentModel.Width, ComponentModel.Height);
+        }
+    }
+    public string GetStyle(string type)
+    {
+        switch (type.ToLower())
+        {
+            case "translate":
+                return "translate(" + ComponentModel.X + "px, " + ComponentModel.Y + "px);";
+            case "width":
+                return "width:" + ComponentModel.Width + "px;";
+            case "height":
+                return "height:" + ComponentModel.Height + "px;";
+            case "border":
+                if (ComponentModel.Border)
+                    return "border: 1px solid grey;";
+                else
+                    return string.Empty;
+            default:
+                return string.Empty;
+        }
+    }
+
+
+    
+}

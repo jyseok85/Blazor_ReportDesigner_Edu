@@ -1,0 +1,88 @@
+﻿@page "/04"
+<h3>04. Resize Component</h3>
+
+<_04_Band/>
+<style>
+    .dragable-area {
+        height: 500px;
+        border: 1px dashed black;
+        position: relative;
+    }
+
+    .band {
+        background-color: aliceblue;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .ui-resizable-w {
+        top: 50%;
+        margin-top:-3px;
+        left: -8px;
+        cursor: w-resize;
+    }
+
+    .ui-resizable-e {
+        top: 50%;
+        margin-top: -3px;
+        right: -8px;
+        cursor: e-resize;
+    }
+
+    .ui-resizable-s {
+        left: 50%;
+        margin-left: -3px;
+        bottom: -8px;
+        cursor: s-resize;
+    }
+
+    .ui-resizable-n {
+        left: 50%;
+        margin-left: -3px;
+        top: -8px;
+        cursor: n-resize;
+    }
+
+    .ui-resizable-se {
+        bottom: -8px;
+        right: -8px;
+        cursor: se-resize;
+    }
+
+    .ui-resizable-sw {
+        bottom: -8px;
+        left: -8px;
+        cursor: sw-resize;
+    }
+
+    .ui-resizable-ne {
+        top: -8px;
+        right: -8px;
+        cursor: ne-resize;
+    }
+
+    .ui-resizable-nw {
+        top: -8px;
+        left: -8px;
+        cursor: nw-resize;
+    }
+
+    .ui-resize-handle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        font-size: 1px;
+        border: 1px solid #333;
+        background-color: transparent;
+        visibility: inherit;
+    }
+</style>
+
+현재 문제점은 마우스가 드래그영역을 벗어나면 OnPointerLeave 이벤트가 발생한다는 것이다.
+다른 프로그램보면 윈도우창 전체 영역에 마우스 이벤트가 유지된다.
+이건 어떻게 개선할지 고민해야한다.
+@code {
+
+}
