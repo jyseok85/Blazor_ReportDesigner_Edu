@@ -1,0 +1,64 @@
+﻿@inject _05_DragAndDropService DragService
+
+<div class="componentbase"
+     draggable="@isDragAble.ToString()"
+     tabindex="@BaseControlModel.TabIndex"
+     @onpointerdown=OnPointerDown
+     @onpointerdown:stopPropagation="true"
+     @ondragstart="@((e) => OnDragStart(e))"
+     style=@("transform:" + GetStyle("translate") + "position:absolute;" + GetStyle("width") + GetStyle("height") + GetStyle("border"))>
+     
+        <_05_ResizeArea Model=BaseControlModel.ResizeModel></_05_ResizeArea>
+</div>
+@code {
+    [CascadingParameter] _05_Band Band { get; set; }
+    [Parameter] public _05_BaseControlModel BaseControlModel { get; set; } = new _05_BaseControlModel();
+
+    public bool IsMouseDown { get; set; } = false;
+
+    public bool IsDragAble { get { return this.isDragAble; } set {this.isDragAble = value;} }
+    bool isDragAble = false;
+    void OnPointerDown(PointerEventArgs e)
+    {
+        if (BaseControlModel.ResizeModel.GrapedResizeControl)
+        {
+            Band.State = _05_Band.ActionState.Resize;
+            isDragAble = false;
+        }
+        else
+        {
+            if (e.CtrlKey == false)
+            {
+                Band.ClearControlSelect();
+            }
+            BaseControlModel.Selected = true;
+            isDragAble = true;
+        }
+
+        Console.WriteLine($"BaseControl - OnMouseDown : {Band.State} {BaseControlModel.Uid}");
+    }
+    void OnDragStart(DragEventArgs e)
+    {
+        Console.WriteLine($"BaseControl - OnDragStart " + BaseControlModel.Uid);
+        DragService.StartDrag(BaseControlModel.Uid, (int)e.ClientX, (int)e.ClientY);
+    }
+    public string GetStyle(string type) 
+    {
+        switch (type.ToLower())
+        {
+            case "translate":
+                return "translate(" + BaseControlModel.X + "px, " + BaseControlModel.Y + "px);";
+            case "width":
+                return "width:" + BaseControlModel.Width + "px;";
+            case "height":
+                return "height:" + BaseControlModel.Height + "px;";
+            case "border":
+                if (BaseControlModel.Border)
+                    return "border: 1px solid grey;";
+                else
+                    return string.Empty;
+            default:
+                return string.Empty;
+        }
+    }
+}

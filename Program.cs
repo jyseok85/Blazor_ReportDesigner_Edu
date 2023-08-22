@@ -8,6 +8,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<_01_DragAndDropService>();
 builder.Services.AddSingleton<_03_DragAndDropService>();
+builder.Services.AddSingleton<_05_DragAndDropService>();
 
 var app = builder.Build();
 

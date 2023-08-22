@@ -1,0 +1,35 @@
+﻿@*@onpointermove:preventDefault //이거 적용하면 컨트롤 안에서 드래그가 안됨. 컨트롤 밖으로 마우스 이동해야 드래그가 됨.*@
+
+
+ 
+<div class="resize-area"
+     style=@("width:" + Model.Width + "px;height:" + Model.Height + "px;" +
+     GetTransform() + "border:1px solid #337ab7") hidden=@Model.Hidden>
+
+
+    <div class="ui-resize-handle ui-resizable-w" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"w")' />
+    <div class="ui-resize-handle ui-resizable-e" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"e")' />
+    <div class="ui-resize-handle ui-resizable-s" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"s")' />
+    <div class="ui-resize-handle ui-resizable-n" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"n")' />
+    <div class="ui-resize-handle ui-resizable-se" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"se")' />
+    <div class="ui-resize-handle ui-resizable-sw" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"sw")' />
+    <div class="ui-resize-handle ui-resizable-ne" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"ne")' />
+    <div class="ui-resize-handle ui-resizable-nw" style="z-index:95;display:block;" @onpointerdown='e=>OnResizePointerDown(e,"nw")' />
+</div>
+
+@code {
+    [Parameter]
+    public _05_ResizeControlModel Model { get; set; } = new _05_ResizeControlModel();
+
+    void OnResizePointerDown(PointerEventArgs e, string type)
+    {
+        Console.WriteLine($"ResizeArea - OnResizePointerDown : {type}");
+        Model.ActionStart(e, type);
+    }
+
+    string GetTransform()
+    {
+        //부모 컴포넌트의 Border에 의해서 1px 씩 밀려나기 때문에 조정해준다.
+        return "transform:translate(" + (Model.X - 1) + "px, " + (Model.Y - 1) + "px);";
+    }
+}

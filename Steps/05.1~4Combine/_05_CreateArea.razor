@@ -1,0 +1,11 @@
+﻿<div class="create-area"
+     @onpointerup:preventDefault
+     @onpointermove:preventDefault
+     style=@("width:" + Model.Width + "px;height:" + Model.Height + "px;" + 
+     "transform:translate(" + Model.X + "px," + Model.Y + "px);" ) hidden=@Model.Hidden>
+ </div>
+
+@code {
+    [Parameter]
+    public _05_CreateControlModel Model { get; set; } = new _05_CreateControlModel();
+}
