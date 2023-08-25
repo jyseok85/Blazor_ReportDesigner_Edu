@@ -1,0 +1,39 @@
+﻿@inject _06_DragAndDropService DragService
+
+<div class="componentbase"
+     @onpointerdown=OnPointerDown
+     style=@("transform:" + GetStyle("translate") + "position:absolute;" + GetStyle("width") + GetStyle("height") + GetStyle("border"))>
+</div>
+
+@code {
+    [CascadingParameter] _06_Band Band { get; set; }
+    [Parameter] public _06_BaseControlModel BaseControlModel { get; set; } = new _06_BaseControlModel();
+
+    void OnPointerDown(PointerEventArgs e)
+    {
+        BaseControlModel.Selected = true;
+        BaseControlModel.DragAble = true;
+        Band.SetCurrentControl(BaseControlModel.Uid);
+        Console.WriteLine($"componentbase OnPointerDown {(int)e.OffsetX} ");
+    }
+    public string GetStyle(string type)
+    {
+        switch (type.ToLower())
+        {
+            case "translate":
+                return "translate(" + BaseControlModel.X + "px, " + BaseControlModel.Y + "px);";
+            //테두리 겹침 문제로 인하여 렌더링시만 + 1 해서 표시해줌.
+            case "width":
+                return "width:" + (BaseControlModel.Width + 1) + "px;";
+            case "height":
+                return "height:" + (BaseControlModel.Height + 1) + "px;";
+            case "border":
+                if (BaseControlModel.Border)
+                    return "border: 1px solid grey;";
+                else
+                    return string.Empty;
+            default:
+                return string.Empty;
+        }
+    }
+}

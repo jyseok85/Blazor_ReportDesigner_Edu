@@ -1,0 +1,213 @@
+﻿@using System.Numerics;
+@inject _06_DragAndDropService DragService
+
+<div class="dragable-area band"
+     @onpointerdown=OnPointerDown
+     @onpointerup=OnPointerUp
+     @onpointermove=OnPointerMove
+     ondragover="event.preventDefault()">
+    <_06_SnapLine Model="SnapLineModel"></_06_SnapLine>
+
+    <CascadingValue Value="this">
+        @foreach (_06_BaseControlModel control in Controls)
+        {
+            <_06_BaseControl BaseControlModel="control"></_06_BaseControl>
+        }
+    </CascadingValue> 
+
+    <_06_DragObject DragService="DragService"></_06_DragObject>
+</div>
+
+@code {
+    public List<_06_BaseControlModel> Controls { get; set; } = new List<_06_BaseControlModel>();
+
+
+    List<int> snapX = new List<int>();
+    List<int> snapY = new List<int>();
+
+    public _06_SnapLineModel SnapLineModel { get; set; } = new _06_SnapLineModel();
+
+    private _06_BaseControlModel? CurrentSelectedModel;
+
+    public void SetCurrentControl(string uid)
+    {
+        CurrentSelectedModel = Controls.Find(x => x.Uid == uid);
+
+        if (CurrentSelectedModel is not null)
+        {
+            DragService.Hidden = false;
+            DragService.X = CurrentSelectedModel.X;
+            DragService.Y = CurrentSelectedModel.Y;
+            DragService.Width = CurrentSelectedModel.Width;
+            DragService.Height = CurrentSelectedModel.Height;
+        }
+    }
+    protected override void OnInitialized()
+    {
+        _06_BaseControlModel control = new _06_BaseControlModel()
+            {
+                Uid = Guid.NewGuid().ToString(),
+                X = 10,
+                Y = 20,
+                Width = 200,
+                Height = 50
+            };
+
+        //컴포넌트 목록에 추가한다.
+        this.Controls.Add(control);
+
+        control = new _06_BaseControlModel()
+            {
+                Uid = Guid.NewGuid().ToString(),
+                X = 40,
+                Y = 90,
+                Width = 50,
+                Height = 150
+            };
+
+        ////컴포넌트 목록에 추가한다.
+        this.Controls.Add(control);
+        UpdateSnapControl();
+    }   
+
+    void OnPointerDown(PointerEventArgs e)
+    {
+        //마우스의 Client의 절대좌표에서 컨트롤안에서의 마우스상대좌표를 빼면 현재 컨트롤의 Client좌표를 얻을 수 있다.
+        if (CurrentSelectedModel is not null && CurrentSelectedModel.DragAble)
+            DragService.StartDrag(CurrentSelectedModel.X, CurrentSelectedModel.Y, e.ClientX, e.ClientY);
+
+    }
+    void OnPointerMove(PointerEventArgs e)
+    {
+        if (CurrentSelectedModel is not null && CurrentSelectedModel.DragAble)
+        {
+            DragService.Move(e.ClientX, e.ClientY);
+
+            DoSnap();
+        }
+    }
+    void OnPointerUp(PointerEventArgs e)
+    {
+
+        if (CurrentSelectedModel is not null)
+        {
+            if (CurrentSelectedModel.DragAble)
+            {
+                CurrentSelectedModel.X = (int)DragService.X;
+                CurrentSelectedModel.Y = (int)DragService.Y;
+                DragService.Hidden = true;
+            }
+            CurrentSelectedModel.DragAble = false;
+            SnapLineModel.HideSnapLine();
+            UpdateSnapControl();
+        }
+    }
+    /// <summary>
+    /// 현재 밴드에 포함된 모든 컨트롤의 스냅 위치를 계산한다.
+    /// 1. 컨트롤 생성, 삭제
+    /// 2. 컨트롤 이동
+    /// 3. 컨트롤 사이즈 변경
+    /// </summary>
+    public void UpdateSnapControl()
+    {
+        snapX.Clear();
+        snapY.Clear();
+
+        snapX.Add(0);
+        snapY.Add(0);
+
+        //리포트 사이즈를 넣는다 x,y는 0일테니 의미없고,
+
+        //밴드 사이즈를 넣는다. 
+
+        //리포트 사이즈를 넣는다.
+
+        foreach (_06_BaseControlModel control in Controls)
+        {
+            int x = (int)control.X;
+            int y = (int)control.Y;
+            int right = (int)control.Right;
+            int bottom = (int)control.Bottom;
+            if (snapX.Contains(x) == false)
+                snapX.Add(x);
+            if (snapY.Contains(bottom) == false)
+                snapY.Add(bottom);
+            if (snapY.Contains(y) == false)
+                snapY.Add(y);
+            if (snapX.Contains(right) == false)
+                snapX.Add(right);
+        }
+        string strx = String.Join(", ", snapX.ToArray());
+        string stry = String.Join(", ", snapY.ToArray());
+        Console.WriteLine($"UpdateSnapControl x:[{strx}] y:[{stry}]");
+    }
+
+
+
+    private void DoSnap()
+    {
+        Dictionary<string, int> dragObjectSnapPoint = new Dictionary<string, int>();
+        dragObjectSnapPoint.Add("left", (int)DragService.X);
+        dragObjectSnapPoint.Add("top", (int)DragService.Y);
+        dragObjectSnapPoint.Add("right", (int)DragService.Right);
+        dragObjectSnapPoint.Add("bottom", (int)DragService.Bottom);
+
+        foreach (KeyValuePair<string, int> point in dragObjectSnapPoint)
+        {
+            int findValue = point.Value;
+            int value = 0;
+
+            if (point.Key.Equals("left") || point.Key.Equals("right"))
+                value = snapX.OrderBy(x => Math.Abs(findValue - x)).First();
+            else
+                value = snapY.OrderBy(x => Math.Abs(findValue - x)).First();
+
+            if (Math.Abs(findValue - value) < 10)
+            {
+                SnapLineModel.ShowSnapLine(point.Key, true, value);
+                if (Math.Abs(findValue - value) < 5)
+                {
+                    SetSnap(point.Key, value);
+                }
+            }
+            else
+            {
+                SnapLineModel.ShowSnapLine(point.Key, false, value);
+            }
+        }
+
+        void SetSnap(string direction, int value)
+        {
+            switch (direction)
+            {
+                case "left":
+                    DragService.X = value;
+                    break;
+                case "top":
+                    DragService.Y = value;
+                    break;
+                case "right":
+                    DragService.X = value - (int)DragService.Width;
+                    break;
+                case "bottom":
+                    DragService.Y = value - (int)DragService.Height;
+                    break;
+            }
+        }
+    }
+
+    private void RemoveDuplicateBorder()
+    {
+        //현재 컨트롤과 붙어 있는 컨트롤을 찾는다.
+
+        if (CurrentSelectedModel is not null)
+        {
+            int left = (int)CurrentSelectedModel.X;
+            int top = (int)CurrentSelectedModel.Y;
+            int right = CurrentSelectedModel.Right;
+            int bottom = CurrentSelectedModel.Bottom;
+        }
+
+        //CurrentSelectedModel = Controls.Find(x => x.Uid == uid);
+    }
+}
