@@ -1,8 +1,8 @@
 ﻿@inject _06_DragAndDropService DragService
 
-<div class="componentbase"
+<div tabIndex=@(BaseControlModel.TabIndex) class="componentbase"
      @onpointerdown=OnPointerDown
-     style=@("transform:" + GetStyle("translate") + "position:absolute;" + GetStyle("width") + GetStyle("height") + GetStyle("border"))>
+     style=@("transform:" + GetStyle("translate") + "position:absolute;outline:none;" + GetStyle("width") + GetStyle("height") + GetStyle("border"))>
 </div>
 
 @code {
@@ -28,6 +28,9 @@
             case "height":
                 return "height:" + (BaseControlModel.Height + 1) + "px;";
             case "border":
+                if(BaseControlModel.IsOverlap)
+                    return "border: 1px solid red;";
+
                 if (BaseControlModel.Border)
                     return "border: 1px solid grey;";
                 else

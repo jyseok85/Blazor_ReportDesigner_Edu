@@ -11,6 +11,7 @@
 
     public double Y { get; set; } = 0;
 
+    
     public int Right => (int)X + Width;
 
     public int Bottom => (int)Y + Height;
@@ -27,7 +28,9 @@
         }
     }
 
+
     public bool DragAble { get; set; } = false;
+    public bool IsOverlap { get; set; } = false;
 }
 
 
