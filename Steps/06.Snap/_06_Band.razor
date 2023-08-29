@@ -243,8 +243,6 @@
                             {   //가장 이동이 적은 다음 스냅 포인트로 이동한다.                             
                                 CurrentSelectedModel.X += movement.OrderBy(x => x).First();
                             }
-                            //밴드의 가로 사이즈보다 멀리나갈수 없다.
-                            //todo
                         }
                         break;
                     case "ArrowDown":
@@ -256,7 +254,6 @@
                             if (selected1.Count() > 0)
                             {
                                 var point = selected1.OrderBy(x => x).First();
-                                //이동거리를 추가한다. 
                                 movement.Add(point - CurrentSelectedModel.Bottom);
                             }
 
@@ -269,7 +266,7 @@
                             }
 
                             if (movement.Count > 0)
-                            {   //가장 이동이 적은 다음 스냅 포인트로 이동한다.                             
+                            {                             
                                 CurrentSelectedModel.Y += movement.OrderBy(x => x).First();
                             }
                         }
@@ -292,7 +289,7 @@
                                 movement.Add((int)CurrentSelectedModel.X - point);
                             }
                             if (movement.Count > 0)
-                            {   //가장 이동이 적은 다음 스냅 포인트로 이동한다.
+                            {  
                                 CurrentSelectedModel.X -= movement.OrderBy(x => x).First();
                             }
                         }
@@ -306,11 +303,9 @@
                             if (selected1.Count() > 0)
                             {
                                 var point = selected1.OrderBy(x => x).Last();
-                                //이동거리를 추가한다.
                                 movement.Add(CurrentSelectedModel.Bottom-point);
                             }
 
-                            //컨트롤의 왼쪽 좌표 기준으로 오른쪽으로 검색을 한다.
                             var selected2 = snapY.Where(n => n < CurrentSelectedModel.Y);
                             if (selected2.Count() > 0)
                             {
@@ -319,7 +314,7 @@
                             }
 
                             if (movement.Count > 0)
-                            {   //가장 이동이 적은 다음 스냅 포인트로 이동한다.
+                            { 
                                 CurrentSelectedModel.Y -= movement.OrderBy(x => x).First();
                             }
                         }
