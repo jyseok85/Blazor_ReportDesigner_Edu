@@ -1,0 +1,46 @@
+﻿<div style="position:absolute;width:100%;height:100%">
+    <div class="snap-vertical" style=@(GetTransform("left")) hidden=@Model.LeftHidden></div>
+    <div class="snap-horizontal" style=@(GetTransform("top")) hidden=@Model.TopHidden></div>
+    <div class="snap-vertical" style=@(GetTransform("right")) hidden=@Model.RightHidden></div>
+    <div class="snap-horizontal" style=@(GetTransform("bottom")) hidden=@Model.BottomHidden></div>
+</div>
+<style>
+ 
+    .snap-vertical {
+        height: 100%;
+        width:0px;
+        border-left: solid 1px red;
+        position:absolute;
+    }
+
+    .snap-horizontal {
+        width: 100%;
+        height:0px;
+        border-top: solid 1px red;
+        position: absolute;
+    }
+
+</style>
+
+@code{
+
+    [Parameter]
+    public _07_SnapLineModel Model { get; set; } = new _07_SnapLineModel();
+
+    public string GetTransform(string direction)
+    {
+        string rValue = string.Empty;
+        switch (direction)
+        {
+            case "left":
+                rValue= "transform:translate(" + Model.LeftPos + "px,0px);"; break;
+            case "top":
+                rValue = "transform:translate(0px," + Model.TopPos + "px);"; break;
+            case "right":
+                rValue = "transform:translate(" + Model.RightPos + "px,0px);"; break;
+            case "bottom":
+                rValue = "transform:translate(0px," + Model.BottomPos + "px); "; break;
+        }
+        return rValue;
+    }
+}

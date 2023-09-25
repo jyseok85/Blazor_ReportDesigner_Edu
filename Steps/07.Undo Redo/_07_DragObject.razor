@@ -1,0 +1,13 @@
+﻿ 
+<div class="drag-object"
+     style=@("width:" + DragService.Width + "px;height:" + DragService.Height + "px;" +
+             "transform:translate(" + (DragService.X) + "px, " + (DragService.Y) + "px);") hidden=@DragService.Hidden>
+</div>
+
+@code {
+    //서비스를 Inject해서 사용하지 않고, 파라메터로 사용하는 이유는 UI 갱신이 때문이다.
+    //Blazor에서 사용하는 태그는 데이터가 변경된다고 UI가 갱신되지 않고,
+    //Blazor의 속성이나 렌더를 수동으로 변경해야 발생한다. 
+    [Parameter]
+    public _07_DragAndDropService DragService { get; set; } = new _07_DragAndDropService();
+}

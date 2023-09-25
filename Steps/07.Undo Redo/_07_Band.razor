@@ -1,34 +1,41 @@
 ﻿@using System.Numerics;
-@inject _06_DragAndDropService DragService
+@inject _07_DragAndDropService DragService
 
 <div class="dragable-area band"
+     tabindex="0"
      @onpointerdown=OnPointerDown
      @onpointerup=OnPointerUp
      @onpointermove=OnPointerMove
      @onkeydown=OnKeyDown
      @onkeyup=OnKeyUp
      ondragover="event.preventDefault()">
-    <_06_SnapLine Model="SnapLineModel"></_06_SnapLine>
+    <_07_SnapLine Model="SnapLineModel"></_07_SnapLine>
 
     <CascadingValue Value="this">
-        @foreach (_06_BaseControlModel control in Controls)
+        @foreach (_07_BaseControlModel control in Controls)
         {
-            <_06_BaseControl BaseControlModel="control"></_06_BaseControl>
+            <_07_BaseControl BaseControlModel="control"></_07_BaseControl>
         }
     </CascadingValue> 
 
-    <_06_DragObject DragService="DragService"></_06_DragObject>
+    <_07_DragObject DragService="DragService"></_07_DragObject>
 </div>
 
 @code {
-    public List<_06_BaseControlModel> Controls { get; set; } = new List<_06_BaseControlModel>();
+    public List<_07_BaseControlModel> Controls { get; set; } = new List<_07_BaseControlModel>();
+
 
     List<int> snapX = new List<int>();
     List<int> snapY = new List<int>();
 
-    public _06_SnapLineModel SnapLineModel { get; set; } = new _06_SnapLineModel();
+    public _07_SnapLineModel SnapLineModel { get; set; } = new _07_SnapLineModel();
 
-    private _06_BaseControlModel? CurrentSelectedModel;
+    private _07_BaseControlModel? CurrentSelectedModel
+    {
+        get { return _07_Manager.Instance.CurrentSelectedModel; }
+        set { _07_Manager.Instance.CurrentSelectedModel = value; }
+    }
+
 
     public void SetCurrentControl(string uid)
     {
@@ -45,7 +52,7 @@
     }
     protected override void OnInitialized()
     {
-        _06_BaseControlModel control = new _06_BaseControlModel()
+        _07_BaseControlModel control = new _07_BaseControlModel()
             {
                 TabIndex = 0,
                 Uid = Guid.NewGuid().ToString(),
@@ -58,32 +65,26 @@
         //컴포넌트 목록에 추가한다.
         this.Controls.Add(control);
 
-        control = new _06_BaseControlModel()
-            {
-                TabIndex = 1,
-                Uid = Guid.NewGuid().ToString(),
-                X = 40,
-                Y = 90,
-                Width = 50,
-                Height = 150
-            };
-
-        ////컴포넌트 목록에 추가한다.
-        this.Controls.Add(control);
         UpdateSnapControl();
+
+        _07_Manager.Instance.ClearHistory();
     }   
 
     void OnPointerDown(PointerEventArgs e)
     {
         //마우스의 Client의 절대좌표에서 컨트롤안에서의 마우스상대좌표를 빼면 현재 컨트롤의 Client좌표를 얻을 수 있다.
         if (CurrentSelectedModel is not null && CurrentSelectedModel.DragAble)
+        {
+            OnActionStart();
             DragService.StartDrag(CurrentSelectedModel.X, CurrentSelectedModel.Y, e.ClientX, e.ClientY);
+        }
 
     }
     void OnPointerMove(PointerEventArgs e)
     {
         if (CurrentSelectedModel is not null && CurrentSelectedModel.DragAble)
         {
+            _07_Manager.Instance.CurrentAction = ActionType.Move;
             DragService.Move(e.ClientX, e.ClientY);
 
             DoSnap();
@@ -99,11 +100,11 @@
                 CurrentSelectedModel.X = (int)DragService.X;
                 CurrentSelectedModel.Y = (int)DragService.Y;
                 DragService.Hidden = true;
+
             }
             CurrentSelectedModel.DragAble = false;
             SnapLineModel.HideSnapLine();
-            UpdateSnapControl();
-            CheckAreaOverlap();
+            OnActionEnd();
         }
     }
     /// <summary>
@@ -126,7 +127,7 @@
 
         //리포트 사이즈를 넣는다.
 
-        foreach (_06_BaseControlModel control in Controls)
+        foreach (_07_BaseControlModel control in Controls)
         {
             //if (control.Equals(CurrentSelectedModel))
             //    continue;
@@ -211,10 +212,12 @@
             if (e.CtrlKey)
             {
                 //Console.WriteLine($"UpdateSnapControl X: {String.Join(", ", snapX.ToArray())}, Y: {String.Join(", ", snapX.ToArray())}");
+                _07_Manager.Instance.CurrentAction = ActionType.Move;
                 List<int> movement = new List<int>();
                 switch (e.Key)
                 {
                     case "ArrowRight":
+                        OnActionStart();
                         {
                             //todo
                             //if (CurrentSelectedModel.Right >= 밴드최대사이즈)
@@ -245,6 +248,8 @@
                         }
                         break;
                     case "ArrowDown":
+                        OnActionStart();
+
                         {
                             //todo
                             //if (CurrentSelectedModel.Bottom >= 밴드최대사이즈)
@@ -265,12 +270,14 @@
                             }
 
                             if (movement.Count > 0)
-                            {                             
+                            {
                                 CurrentSelectedModel.Y += movement.OrderBy(x => x).First();
                             }
                         }
                         break;
                     case "ArrowLeft":
+                        OnActionStart();
+
                         {
                             if (CurrentSelectedModel.X <= 0)
                                 break;
@@ -288,12 +295,13 @@
                                 movement.Add((int)CurrentSelectedModel.X - point);
                             }
                             if (movement.Count > 0)
-                            {  
+                            {
                                 CurrentSelectedModel.X -= movement.OrderBy(x => x).First();
                             }
                         }
                         break;
                     case "ArrowUp":
+                        OnActionStart();
                         {
                             if (CurrentSelectedModel.Y <= 0)
                                 break;
@@ -302,7 +310,7 @@
                             if (selected1.Count() > 0)
                             {
                                 var point = selected1.OrderBy(x => x).Last();
-                                movement.Add(CurrentSelectedModel.Bottom-point);
+                                movement.Add(CurrentSelectedModel.Bottom - point);
                             }
 
                             var selected2 = snapY.Where(n => n < CurrentSelectedModel.Y);
@@ -313,11 +321,12 @@
                             }
 
                             if (movement.Count > 0)
-                            { 
+                            {
                                 CurrentSelectedModel.Y -= movement.OrderBy(x => x).First();
                             }
                         }
                         break;
+
                 }
             }
             else
@@ -339,12 +348,23 @@
                 }
             }
         }
+        if (e.CtrlKey)
+        {
+            switch (e.Key)
+            {
+                case "z":
+                    Undo();
+                    break;
+                case "y":
+                    Redo();
+                    break;
+            }
+        }
     }
 
     private void OnKeyUp(KeyboardEventArgs e)
     {
-        UpdateSnapControl();
-        CheckAreaOverlap();
+        OnActionEnd();
 
     }
 
@@ -360,10 +380,10 @@
         int x2 = (int)CurrentSelectedModel.Right;
         int y1 = (int)CurrentSelectedModel.Y;
         int y2 = CurrentSelectedModel.Bottom;
-        
+
         CurrentSelectedModel.IsOverlap = false;
 
-        foreach (_06_BaseControlModel control in Controls)
+        foreach (_07_BaseControlModel control in Controls)
         {
             if (control.Equals(CurrentSelectedModel))
                 continue;
@@ -380,6 +400,59 @@
             }
             else
                 control.IsOverlap = false;
+        }
+    }
+
+    private void OnActionStart()
+    {
+        //지금 했던 행동을 저장합니다.
+        //ex) 컨트롤이동, 컨트롤 삭제 , 컨트롤 생성.
+        //컨트롤 이동의 경우 현재 컨트롤의 위치 정보를 기록한다.
+        _07_Manager.Instance.SaveState(true);
+    }
+
+    //모든 사용자 행위가 끝난 후에 호출됩니다.
+    private void OnActionEnd()
+    {
+        //포인트업
+        //키업
+        UpdateSnapControl();
+        CheckAreaOverlap();       
+        if (_07_Manager.Instance.CurrentAction != ActionType.None && _07_Manager.Instance.CurrentAction != ActionType.Undo && _07_Manager.Instance.CurrentAction != ActionType.Redo)
+            _07_Manager.Instance.SaveState();
+
+        _07_Manager.Instance.CurrentAction = ActionType.None;
+    }
+
+    public void Undo()
+    {
+        _07_Manager.Instance.CurrentAction = ActionType.Undo;
+        _07_BaseControlModel model = _07_Manager.Instance.Undo();
+        if(model is not null)
+        {
+            CurrentSelectedModel = Controls.Find(x => x.Uid == model.Uid);
+
+            if (CurrentSelectedModel is not null)
+            {
+                CurrentSelectedModel.X = (int)model.X;
+                CurrentSelectedModel.Y = (int)model.Y;
+            }
+        }
+    }
+
+    public void Redo()
+    {
+        _07_Manager.Instance.CurrentAction = ActionType.Redo;
+        _07_BaseControlModel model = _07_Manager.Instance.Redo();
+        if (model is not null)
+        {
+            CurrentSelectedModel = Controls.Find(x => x.Uid == model.Uid);
+
+            if (CurrentSelectedModel is not null)
+            {
+                CurrentSelectedModel.X = (int)model.X;
+                CurrentSelectedModel.Y = (int)model.Y;
+            }
         }
     }
 }

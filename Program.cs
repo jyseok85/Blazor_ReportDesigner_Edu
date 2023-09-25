@@ -10,6 +10,7 @@ builder.Services.AddSingleton<_01_DragAndDropService>();
 builder.Services.AddSingleton<_03_DragAndDropService>();
 builder.Services.AddSingleton<_05_DragAndDropService>();
 builder.Services.AddSingleton<_06_DragAndDropService>();
+builder.Services.AddSingleton<_07_DragAndDropService>();
 
 var app = builder.Build();
 
